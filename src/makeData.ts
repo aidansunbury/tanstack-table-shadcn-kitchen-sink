@@ -81,7 +81,7 @@ export function makeColumnData(rows: number, headers: Header[]) {
 	for (let i = 0; i < rows; i++) {
 		const row: Record<string, string> = {};
 		headers.forEach((header, j) => {
-			row[header.accessorKey] = faker.lorem.word();
+			row[header.accessorKey] = faker.lorem.word() + i;
 		});
 		columns.push(row);
 	}

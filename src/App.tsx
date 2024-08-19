@@ -5,7 +5,7 @@ import IndeterminateCheckbox from "./components/InderterminateCheckbox";
 
 export const App = () => {
 	const headers = makeHeaderData(10);
-	const columns = makeColumnData(10, headers);
+	const columns = makeColumnData(100, headers);
 	return (
 		<div>
 			hi

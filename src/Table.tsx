@@ -80,14 +80,6 @@ export const Table = ({
 	const [data, setData] = React.useState(makeData(1000));
 	const refreshData = () => setData(makeData(1000));
 
-	// const [columnVisibility, setColumnVisibility] = React.useState({});
-	const [grouping, setGrouping] = React.useState<GroupingState>([]);
-	const [isSplit, setIsSplit] = React.useState(false);
-	// const [rowSelection, setRowSelection] = React.useState({});
-	// const [columnPinning, setColumnPinning] = React.useState({});
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-		[],
-	);
 	const [globalFilter, setGlobalFilter] = React.useState("");
 
 	const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
@@ -107,25 +99,19 @@ export const Table = ({
 		getFacetedRowModel: getFacetedRowModel(),
 		getFacetedUniqueValues: getFacetedUniqueValues(),
 		getFacetedMinMaxValues: getFacetedMinMaxValues(),
-		onColumnFiltersChange: setColumnFilters,
+		// onColumnFiltersChange: setColumnFilters,
 		onGlobalFilterChange: setGlobalFilter,
 		// globalFilterFn: fuzzyFilter,
 		autoResetPageIndex,
 		enableColumnResizing: true,
 		columnResizeMode: "onChange",
 		// onColumnVisibilityChange: setColumnVisibility,
-		onGroupingChange: setGrouping,
 		// onColumnPinningChange: setColumnPinning,
 		// onRowSelectionChange: setRowSelection,
 		// Provide our updateData function to our table meta
 		// meta: getTableMeta(setData, skipAutoResetPageIndex),
 		state: {
-			grouping,
-			columnFilters,
 			globalFilter,
-			// columnVisibility,
-			// columnPinning,
-			// rowSelection,
 		},
 		initialState: {
 			columnPinning: {
@@ -186,14 +172,6 @@ export const Table = ({
 		debugColumns: true,
 	});
 
-	React.useEffect(() => {
-		if (table.getState().columnFilters[0]?.id === "fullName") {
-			if (table.getState().sorting[0]?.id !== "fullName") {
-				table.setSorting([{ id: "fullName", desc: false }]);
-			}
-		}
-	}, [table.getState().columnFilters[0]?.id]);
-
 	const randomizeColumns = () => {
 		table.setColumnOrder(
 			faker.helpers.shuffle(table.getAllLeafColumns().map((d) => d.id)),
@@ -202,7 +180,6 @@ export const Table = ({
 
 	return (
 		<Styles>
-			{JSON.stringify(cols)}
 			<div className="p-2 grid grid-cols-4 gap-4">
 				<div className="p-2">
 					Search:
@@ -242,15 +219,6 @@ export const Table = ({
 					})}
 				</div>
 				<div className="p-2">
-					<div>
-						<input
-							type="checkbox"
-							checked={isSplit}
-							onChange={(e) => setIsSplit(e.target.checked)}
-							className="mx-1"
-						/>
-						Split Mode
-					</div>
 					<button onClick={randomizeColumns} className="border rounded p-1">
 						Shuffle Columns
 					</button>
@@ -263,27 +231,11 @@ export const Table = ({
 			// 	// width: "1000px",
 			// }}
 			>
-				{/* <div className={`flex ${isSplit ? "gap-4" : ""}`}> */}
-				{isSplit ? <CustomTable table={table} tableGroup="left" /> : null}
-				<CustomTable
-					table={table}
-					tableGroup={isSplit ? "center" : undefined}
-				/>
-				{isSplit ? <CustomTable table={table} tableGroup="right" /> : null}
-				{/* </div> */}
+				<CustomTable table={table} tableGroup={undefined} />
 			</div>
 			<div className="p-2" />
 
-			<div className="p-2" />
-			<pre>{JSON.stringify(table.getState(), null, 2)}</pre>
-		</Styles>
-	);
-};
-
-export default Table;
-
-{
-	/* <ActionButtons
+			<ActionButtons
 				getSelectedRowModel={table.getSelectedRowModel}
 				hasNextPage={table.getCanNextPage()}
 				hasPreviousPage={table.getCanPreviousPage()}
@@ -294,9 +246,16 @@ export default Table;
 				previousPage={table.previousPage}
 				refreshData={refreshData}
 				rerender={rerender}
-				rowSelection={rowSelection}
+				rowSelection={table.getSelectedRowModel()}
 				setPageIndex={table.setPageIndex}
 				setPageSize={table.setPageSize}
 				totalRows={table.getPrePaginationRowModel().rows.length}
-			/> */
-}
+			/>
+
+			<div className="p-2" />
+			<pre>{JSON.stringify(table.getState(), null, 2)}</pre>
+		</Styles>
+	);
+};
+
+export default Table;

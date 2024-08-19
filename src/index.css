@@ -5,6 +5,7 @@ html {
 
 table {
   border: 1px solid lightgray;
+  border-collapse: separate !important;
 }
 
 tbody {
@@ -23,4 +24,12 @@ tfoot {
 
 tfoot th {
   font-weight: normal;
+}
+
+.table-container {
+  border: 1px solid lightgray;
+  overflow-x: scroll;
+  width: 100%;
+  /* max-width: 100%; */
+  position: relative;
 }

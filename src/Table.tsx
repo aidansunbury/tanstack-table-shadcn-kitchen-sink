@@ -27,6 +27,7 @@ import DebouncedInput from "./components/DebouncedInput";
 import ActionButtons from "./components/ActionButtons";
 import { faker } from "@faker-js/faker";
 import CustomTable from "./components/CustomTable";
+import { saveData, loadData } from "../saveUtils";
 
 const Styles = styled.div`
   padding: 1rem;
@@ -113,60 +114,7 @@ export const Table = ({
 		state: {
 			globalFilter,
 		},
-		initialState: {
-			columnPinning: {
-				left: ["header-6"],
-				right: [],
-			},
-			columnVisibility: {
-				"header-5": false,
-			},
-		},
-		// initialState: {
-		// 	columnSizing: {
-		// 		"header-3": 736,
-		// 		"header-5": 500,
-		// 	},
-		// 	columnSizingInfo: {
-		// 		startOffset: null,
-		// 		startSize: null,
-		// 		deltaOffset: null,
-		// 		deltaPercentage: null,
-		// 		isResizingColumn: false,
-		// 		columnSizingStart: [],
-		// 	},
-		// 	rowSelection: {},
-		// 	rowPinning: {
-		// 		top: [],
-		// 		bottom: [],
-		// 	},
-		// 	expanded: {},
-		// 	grouping: [],
-		// 	sorting: [],
-		// 	globalFilter: "",
-		// 	columnFilters: [],
-		// 	columnPinning: {
-		// 		left: ["header-6"],
-		// 		right: [],
-		// 	},
-		// 	columnOrder: [
-		// 		"header-5",
-		// 		"header-6",
-		// 		"header-0",
-		// 		"header-3",
-		// 		"header-7",
-		// 		"header-9",
-		// 		"header-1",
-		// 		"header-4",
-		// 		"header-2",
-		// 		"header-8",
-		// 	],
-		// 	columnVisibility: {},
-		// 	pagination: {
-		// 		pageIndex: 0,
-		// 		pageSize: 10,
-		// 	},
-		// },
+		initialState: loadData(),
 		debugTable: true,
 		debugHeaders: true,
 		debugColumns: true,
@@ -219,8 +167,21 @@ export const Table = ({
 					})}
 				</div>
 				<div className="p-2">
-					<button onClick={randomizeColumns} className="border rounded p-1">
+					<button
+						onClick={randomizeColumns}
+						className="border rounded p-1"
+						type="button"
+					>
 						Shuffle Columns
+					</button>
+				</div>
+				<div className="p-2">
+					<button
+						onClick={() => saveData(table.getState())}
+						className="border rounded p-1"
+						type="button"
+					>
+						Save state
 					</button>
 				</div>
 			</div>

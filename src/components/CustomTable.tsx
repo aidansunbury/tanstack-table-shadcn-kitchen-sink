@@ -3,17 +3,29 @@ import {
 	HeaderGroup,
 	Row,
 	RowData,
-	Table,
+	Table as TanstackTable,
 	Column,
 } from "@tanstack/react-table";
 import React, { CSSProperties } from "react";
 import Filter from "./Filter";
 import TablePins from "./TablePins";
+import { reorder } from "../utils/reorder";
+import { Button } from "@/components/ui/button";
+import {
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableFooter,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 
 type TableGroup = "center" | "left" | "right";
 
 function getTableHeaderGroups<T extends RowData>(
-	table: Table<T>,
+	table: TanstackTable<T>,
 	tg?: TableGroup,
 ): [HeaderGroup<T>[], HeaderGroup<T>[]] {
 	if (tg === "left") {
@@ -39,7 +51,7 @@ function getRowGroup<T extends RowData>(row: Row<T>, tg?: TableGroup) {
 }
 
 type Props<T extends RowData> = {
-	table: Table<T>;
+	table: TanstackTable<T>;
 	tableGroup?: TableGroup;
 };
 
@@ -73,21 +85,22 @@ export function CustomTable<T extends RowData>({
 	};
 
 	return (
-		<div className="table-container">
-			<table
+		<div className="border border-lightgray overflow-x-scroll w-full max-w-full relative">
+			<Table
 				style={{
 					width: table.getTotalSize(),
 				}}
+				className="border border-lightgray border-separate"
 			>
-				<thead>
+				<TableHeader>
 					{headerGroups.map((headerGroup) => (
 						<tr key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
 								const { column } = header;
 
 								return (
-									<th
-										className="relative"
+									<TableHead
+										className="relative border-b border-r border-lightgray px-1 py-0.5"
 										key={header.id}
 										// style={{
 										// 	width: header.getSize(),
@@ -147,13 +160,33 @@ export function CustomTable<T extends RowData>({
 												pin={header.column.pin}
 											/>
 										)}
-									</th>
+										<Button
+											type="button"
+											onClick={() =>
+												table.setColumnOrder(
+													reorder(table.getState(), header.column.id, "left"),
+												)
+											}
+										>
+											{"<"}
+										</Button>
+										<Button
+											type="button"
+											onClick={() =>
+												table.setColumnOrder(
+													reorder(table.getState(), header.column.id, "right"),
+												)
+											}
+										>
+											{">"}
+										</Button>
+									</TableHead>
 								);
 							})}
 						</tr>
 					))}
-				</thead>
-				<tbody>
+				</TableHeader>
+				<TableBody className="border-b border-lightgray">
 					{table.getRowModel().rows.map((row) => (
 						<tr key={row.id}>
 							{getRowGroup(row, tableGroup).map((cell) => {
@@ -173,24 +206,28 @@ export function CustomTable<T extends RowData>({
 							})}
 						</tr>
 					))}
-				</tbody>
-				<tfoot>
+				</TableBody>
+				<TableFooter className="text-gray-500">
 					{footerGroup.map((footerGroup) => (
-						<tr key={footerGroup.id}>
+						<TableRow key={footerGroup.id}>
 							{footerGroup.headers.map((header) => (
-								<th key={header.id} colSpan={header.colSpan}>
+								<TableHead
+									key={header.id}
+									colSpan={header.colSpan}
+									className="font-normal"
+								>
 									{header.isPlaceholder
 										? null
 										: flexRender(
 												header.column.columnDef.footer,
 												header.getContext(),
 											)}
-								</th>
+								</TableHead>
 							))}
-						</tr>
+						</TableRow>
 					))}
-				</tfoot>
-			</table>
+				</TableFooter>
+			</Table>
 		</div>
 	);
 }

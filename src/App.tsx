@@ -7,34 +7,31 @@ export const App = () => {
 	const headers = makeHeaderData(10);
 	const columns = makeColumnData(100, headers);
 	return (
-		<div>
-			hi
-			<Table
-				data2={[
-					...headers,
-					{
-						id: "select",
-						header: ({ table }) => (
+		<Table
+			data2={[
+				...headers,
+				{
+					id: "select",
+					header: ({ table }) => (
+						<IndeterminateCheckbox
+							checked={table.getIsAllRowsSelected()}
+							indeterminate={table.getIsSomeRowsSelected()}
+							onChange={table.getToggleAllRowsSelectedHandler()}
+						/>
+					),
+					cell: ({ row }) => (
+						<div className="px-1">
 							<IndeterminateCheckbox
-								checked={table.getIsAllRowsSelected()}
-								indeterminate={table.getIsSomeRowsSelected()}
-								onChange={table.getToggleAllRowsSelectedHandler()}
+								checked={row.getIsSelected()}
+								indeterminate={row.getIsSomeSelected()}
+								onChange={row.getToggleSelectedHandler()}
 							/>
-						),
-						cell: ({ row }) => (
-							<div className="px-1">
-								<IndeterminateCheckbox
-									checked={row.getIsSelected()}
-									indeterminate={row.getIsSomeSelected()}
-									onChange={row.getToggleSelectedHandler()}
-								/>
-							</div>
-						),
-					},
-				]}
-				gridInfo={columns}
-			/>
-		</div>
+						</div>
+					),
+				},
+			]}
+			gridInfo={columns}
+		/>
 	);
 };
 

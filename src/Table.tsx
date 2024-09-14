@@ -45,6 +45,9 @@ export const Table = ({
     const table = useReactTable({
         data: gridData,
         columns: cols,
+        defaultColumn: {
+            minSize: 150, // This will make certain view expectations easier to enforce
+        },
         // defaultColumn,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -60,11 +63,6 @@ export const Table = ({
         autoResetPageIndex,
         enableColumnResizing: true,
         columnResizeMode: "onChange",
-        // onColumnVisibilityChange: setColumnVisibility,
-        // onColumnPinningChange: setColumnPinning,
-        // onRowSelectionChange: setRowSelection,
-        // Provide our updateData function to our table meta
-        // meta: getTableMeta(setData, skipAutoResetPageIndex),
         state: {
             globalFilter,
         },

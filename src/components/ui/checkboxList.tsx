@@ -35,7 +35,7 @@ export function SearchableCheckboxDropdown({
                 <Button variant="outline" className="w-[200px] justify-between">
                     {selectedCount > 0
                         ? `${selectedCount} selected`
-                        : "Select options"}
+                        : "Toggle Visible Columns"}
                     <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
             </PopoverTrigger>

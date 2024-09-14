@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -11,19 +10,13 @@ import {
 } from "@/components/ui/table";
 import {
     type Column,
-    HeaderGroup,
-    Row,
     type RowData,
     type Table as TanstackTable,
     flexRender,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import React, { CSSProperties } from "react";
-import { reorder } from "../utils/reorder";
 import Filter from "./Filter";
-import TablePins from "./TablePins";
-
-type TableGroup = "center" | "left" | "right";
+import { HeaderActions } from "./HeaderActions/HeaderActions";
 
 type TableProps<T extends RowData> = {
     table: TanstackTable<T>;
@@ -59,7 +52,8 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
             isPinned ? "sticky" : "relative",
 
             // Background color
-            isPinned && "bg-white",
+            // isPinned && "bg-white",
+            isPinned && "bg-gray-300",
 
             // Width
             `w-[${column.getSize()}px]`,
@@ -100,23 +94,10 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                                                             .header,
                                                         header.getContext(),
                                                     )}{" "}
-                                                    <button
-                                                        onClick={header.column.getToggleSortingHandler()}
-                                                        className={
-                                                            header.column.getCanSort()
-                                                                ? "cursor-pointer select-none"
-                                                                : ""
-                                                        }
-                                                    >
-                                                        {{
-                                                            asc: "🔼",
-                                                            desc: "🔽",
-                                                        }[
-                                                            header.column.getIsSorted() as string
-                                                        ] ?? "📶"}
-                                                    </button>
                                                 </div>
-                                                {header.column.getCanFilter() ? (
+
+                                                {/* Search Filter */}
+                                                {/* {header.column.getCanFilter() ? (
                                                     <div>
                                                         <Filter
                                                             column={
@@ -125,50 +106,23 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                                                             table={table}
                                                         />
                                                     </div>
-                                                ) : null}
+                                                ) : null} */}
                                             </>
                                         )}
+                                        {/* Get column width */}
+                                        {column.getSize()}
+
+                                        {/* //!Fix resize Todo */}
                                         <div
                                             className="absolute right-0 top-0 h-full w-1 bg-blue-300 select-none touch-none hover:bg-blue-500 cursor-col-resize"
                                             onMouseDown={header.getResizeHandler()}
                                             onTouchStart={header.getResizeHandler()}
                                         />
-                                        {!header.isPlaceholder &&
-                                            header.column.getCanPin() && (
-                                                <TablePins
-                                                    isPinned={header.column.getIsPinned()}
-                                                    pin={header.column.pin}
-                                                />
-                                            )}
-                                        <Button
-                                            type="button"
-                                            onClick={() =>
-                                                table.setColumnOrder(
-                                                    reorder(
-                                                        table.getState(),
-                                                        header.column.id,
-                                                        "left",
-                                                    ),
-                                                )
-                                            }
-                                        >
-                                            {"<"}
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            onClick={() =>
-                                                table.setColumnOrder(
-                                                    reorder(
-                                                        table.getState(),
-                                                        header.column.id,
-                                                        "right",
-                                                    ),
-                                                )
-                                            }
-                                        >
-                                            {">"}
-                                        </Button>
-                                        {header.column.getSize()}
+
+                                        <HeaderActions
+                                            column={header.column}
+                                            table={table}
+                                        />
                                     </TableHead>
                                 );
                             })}
@@ -177,12 +131,12 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                 </TableHeader>
                 <TableBody className="border-b border-lightgray">
                     {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id}>
+                        <TableRow key={row.id}>
                             {row.getVisibleCells().map((cell) => {
                                 const { column } = cell;
 
                                 return (
-                                    <td
+                                    <TableCell
                                         key={cell.id}
                                         className={getCommonPinningStylesTailwind(
                                             column,
@@ -192,32 +146,12 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                                             cell.column.columnDef.cell,
                                             cell.getContext(),
                                         )}
-                                    </td>
+                                    </TableCell>
                                 );
                             })}
-                        </tr>
-                    ))}
-                </TableBody>
-                <TableFooter className="text-gray-500">
-                    {footerGroup.map((footerGroup) => (
-                        <TableRow key={footerGroup.id}>
-                            {footerGroup.headers.map((header) => (
-                                <TableHead
-                                    key={header.id}
-                                    colSpan={header.colSpan}
-                                    className="font-normal"
-                                >
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                              header.column.columnDef.footer,
-                                              header.getContext(),
-                                          )}
-                                </TableHead>
-                            ))}
                         </TableRow>
                     ))}
-                </TableFooter>
+                </TableBody>
             </Table>
         </div>
     );

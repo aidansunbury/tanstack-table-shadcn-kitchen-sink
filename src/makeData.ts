@@ -1,89 +1,89 @@
 import { faker } from "@faker-js/faker";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 type Header = {
-	id: string;
-	accessorKey: string;
+    id: string;
+    accessorKey: string;
 };
 
 export type Person = {
-	firstName: string;
-	lastName: string;
-	age: number;
-	prop1: number;
-	prop2: number;
-	prop3: number;
-	prop4: number;
-	prop5: number;
-	prop6: number;
-	prop7: number;
-	visits: number;
-	progress: number;
-	status: "relationship" | "complicated" | "single";
-	subRows?: Person[];
+    firstName: string;
+    lastName: string;
+    age: number;
+    prop1: number;
+    prop2: number;
+    prop3: number;
+    prop4: number;
+    prop5: number;
+    prop6: number;
+    prop7: number;
+    visits: number;
+    progress: number;
+    status: "relationship" | "complicated" | "single";
+    subRows?: Person[];
 };
 
 const range = (len: number) => {
-	const arr: number[] = [];
-	for (let i = 0; i < len; i++) {
-		arr.push(i);
-	}
-	return arr;
+    const arr: number[] = [];
+    for (let i = 0; i < len; i++) {
+        arr.push(i);
+    }
+    return arr;
 };
 
 const newPerson = (): Person => {
-	return {
-		firstName: faker.person.firstName(),
-		lastName: faker.person.lastName(),
-		age: faker.number.int(40),
-		prop1: faker.number.int(100),
-		prop2: faker.number.int(100),
-		prop3: faker.number.int(100),
-		prop4: faker.number.int(100),
-		prop5: faker.number.int(100),
-		prop6: faker.number.int(100),
-		prop7: faker.number.int(100),
-		visits: faker.number.int(1000),
-		progress: faker.number.int(100),
-		status: faker.helpers.shuffle<Person["status"]>([
-			"relationship",
-			"complicated",
-			"single",
-		])[0]!,
-	};
+    return {
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
+        age: faker.number.int(40),
+        prop1: faker.number.int(100),
+        prop2: faker.number.int(100),
+        prop3: faker.number.int(100),
+        prop4: faker.number.int(100),
+        prop5: faker.number.int(100),
+        prop6: faker.number.int(100),
+        prop7: faker.number.int(100),
+        visits: faker.number.int(1000),
+        progress: faker.number.int(100),
+        status: faker.helpers.shuffle<Person["status"]>([
+            "relationship",
+            "complicated",
+            "single",
+        ])[0]!,
+    };
 };
 
 export function makeData(...lens: number[]) {
-	const makeDataLevel = (depth = 0): Person[] => {
-		const len = lens[depth]!;
-		return range(len).map((d): Person => {
-			return {
-				...newPerson(),
-				subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
-			};
-		});
-	};
+    const makeDataLevel = (depth = 0): Person[] => {
+        const len = lens[depth]!;
+        return range(len).map((d): Person => {
+            return {
+                ...newPerson(),
+                subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
+            };
+        });
+    };
 
-	return makeDataLevel();
+    return makeDataLevel();
 }
 
 // Make items number of columns
 export function makeHeaderData(items: number): ColumnDef<any>[] {
-	return range(items).map((i) => ({
-		id: `header-${i}`,
-		accessorKey: `col-${i}`,
-		cell: (info) => info.getValue(),
-	}));
+    return range(items).map((i) => ({
+        id: `header-${i}`,
+        accessorKey: `col-${i}`,
+        cell: (info) => info.getValue(),
+    }));
 }
 
 export function makeColumnData(rows: number, headers: Header[]) {
-	const columns: Record<string, string>[] = [];
+    const columns: Record<string, string>[] = [];
 
-	for (let i = 0; i < rows; i++) {
-		const row: Record<string, string> = {};
-		headers.forEach((header, j) => {
-			row[header.accessorKey] = faker.lorem.word() + i;
-		});
-		columns.push(row);
-	}
-	return columns;
+    for (let i = 0; i < rows; i++) {
+        const row: Record<string, string> = {};
+        headers.forEach((header, j) => {
+            row[header.accessorKey] = faker.lorem.word() + i;
+        });
+        columns.push(row);
+    }
+    return columns;
 }

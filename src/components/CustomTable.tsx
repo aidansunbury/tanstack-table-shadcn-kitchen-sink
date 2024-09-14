@@ -1,235 +1,226 @@
-import {
-	flexRender,
-	HeaderGroup,
-	Row,
-	RowData,
-	Table as TanstackTable,
-	Column,
-} from "@tanstack/react-table";
-import React, { CSSProperties } from "react";
-import Filter from "./Filter";
-import TablePins from "./TablePins";
-import { reorder } from "../utils/reorder";
 import { Button } from "@/components/ui/button";
 import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableFooter,
-	TableHead,
-	TableHeader,
-	TableRow,
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
+import {
+    type Column,
+    HeaderGroup,
+    Row,
+    type RowData,
+    type Table as TanstackTable,
+    flexRender,
+} from "@tanstack/react-table";
+import clsx from "clsx";
+import React, { CSSProperties } from "react";
+import { reorder } from "../utils/reorder";
+import Filter from "./Filter";
+import TablePins from "./TablePins";
 
 type TableGroup = "center" | "left" | "right";
 
-function getTableHeaderGroups<T extends RowData>(
-	table: TanstackTable<T>,
-	tg?: TableGroup,
-): [HeaderGroup<T>[], HeaderGroup<T>[]] {
-	if (tg === "left") {
-		return [table.getLeftHeaderGroups(), table.getLeftFooterGroups()];
-	}
-
-	if (tg === "right") {
-		return [table.getRightHeaderGroups(), table.getRightFooterGroups()];
-	}
-
-	if (tg === "center") {
-		return [table.getCenterHeaderGroups(), table.getCenterFooterGroups()];
-	}
-
-	return [table.getHeaderGroups(), table.getFooterGroups()];
-}
-
-function getRowGroup<T extends RowData>(row: Row<T>, tg?: TableGroup) {
-	if (tg === "left") return row.getLeftVisibleCells();
-	if (tg === "right") return row.getRightVisibleCells();
-	if (tg === "center") return row.getCenterVisibleCells();
-	return row.getVisibleCells();
-}
-
-type Props<T extends RowData> = {
-	table: TanstackTable<T>;
-	tableGroup?: TableGroup;
+type TableProps<T extends RowData> = {
+    table: TanstackTable<T>;
 };
 
-export function CustomTable<T extends RowData>({
-	table,
-	tableGroup,
-}: Props<T>) {
-	const [headerGroups, footerGroup] = getTableHeaderGroups(table, tableGroup);
+export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
+    const [headerGroups, footerGroup] = [
+        table.getHeaderGroups(),
+        table.getFooterGroups(),
+    ];
 
-	const getCommonPinningStyles = (column: Column<T>): CSSProperties => {
-		const isPinned = column.getIsPinned();
-		const isLastLeftPinnedColumn =
-			isPinned === "left" && column.getIsLastColumn("left");
-		const isFirstRightPinnedColumn =
-			isPinned === "right" && column.getIsFirstColumn("right");
+    const getCommonPinningStylesTailwind = (column: Column<T>) => {
+        const isPinned = column.getIsPinned();
+        const isLastLeftPinnedColumn =
+            isPinned === "left" && column.getIsLastColumn("left");
+        const isFirstRightPinnedColumn =
+            isPinned === "right" && column.getIsFirstColumn("right");
 
-		return {
-			boxShadow: isLastLeftPinnedColumn
-				? "-4px 0 4px -4px gray inset"
-				: isFirstRightPinnedColumn
-					? "4px 0 4px -4px gray inset"
-					: undefined,
-			left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
-			right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
-			opacity: isPinned ? 0.95 : 1,
-			position: isPinned ? "sticky" : "relative",
-			backgroundColor: isPinned ? "white" : undefined,
-			width: column.getSize(),
-			zIndex: isPinned ? 1 : 0,
-		};
-	};
+        return clsx(
+            // Box shadow
+            isLastLeftPinnedColumn && "shadow-[-4px_0_4px_-4px_gray_inset]",
+            isFirstRightPinnedColumn && "shadow-[4px_0_4px_-4px_gray_inset]",
 
-	return (
-		<div className="border border-lightgray overflow-x-scroll w-full max-w-full relative">
-			<Table
-				style={{
-					width: table.getTotalSize(),
-				}}
-				className="border border-lightgray border-separate"
-			>
-				<TableHeader>
-					{headerGroups.map((headerGroup) => (
-						<tr key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								const { column } = header;
+            // Position
+            isPinned === "left" && `left-[${column.getStart("left")}px]`,
+            isPinned === "right" && `right-[${column.getAfter("right")}px]`,
 
-								return (
-									<TableHead
-										className="relative border-b border-r border-lightgray px-1 py-0.5"
-										key={header.id}
-										// style={{
-										// 	width: header.getSize(),
-										// }}
-										style={{ ...getCommonPinningStyles(column) }}
-										colSpan={header.colSpan}
-									>
-										{header.isPlaceholder ? null : (
-											<>
-												<div>
-													{header.column.getCanGroup() ? (
-														// If the header can be grouped, let's add a toggle
-														<button
-															onClick={header.column.getToggleGroupingHandler()}
-															style={{
-																cursor: "pointer",
-															}}
-														>
-															{header.column.getIsGrouped()
-																? `🛑(${header.column.getGroupedIndex()})`
-																: `👊`}
-														</button>
-													) : null}{" "}
-													{flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}{" "}
-													<button
-														onClick={header.column.getToggleSortingHandler()}
-														className={
-															header.column.getCanSort()
-																? "cursor-pointer select-none"
-																: ""
-														}
-													>
-														{{
-															asc: "🔼",
-															desc: "🔽",
-														}[header.column.getIsSorted() as string] ?? "📶"}
-													</button>
-												</div>
-												{header.column.getCanFilter() ? (
-													<div>
-														<Filter column={header.column} table={table} />
-													</div>
-												) : null}
-											</>
-										)}
-										<div
-											className="absolute right-0 top-0 h-full w-1 bg-blue-300 select-none touch-none hover:bg-blue-500 cursor-col-resize"
-											onMouseDown={header.getResizeHandler()}
-											onTouchStart={header.getResizeHandler()}
-										/>
-										{!header.isPlaceholder && header.column.getCanPin() && (
-											<TablePins
-												isPinned={header.column.getIsPinned()}
-												pin={header.column.pin}
-											/>
-										)}
-										<Button
-											type="button"
-											onClick={() =>
-												table.setColumnOrder(
-													reorder(table.getState(), header.column.id, "left"),
-												)
-											}
-										>
-											{"<"}
-										</Button>
-										<Button
-											type="button"
-											onClick={() =>
-												table.setColumnOrder(
-													reorder(table.getState(), header.column.id, "right"),
-												)
-											}
-										>
-											{">"}
-										</Button>
-									</TableHead>
-								);
-							})}
-						</tr>
-					))}
-				</TableHeader>
-				<TableBody className="border-b border-lightgray">
-					{table.getRowModel().rows.map((row) => (
-						<tr key={row.id}>
-							{getRowGroup(row, tableGroup).map((cell) => {
-								const { column } = cell;
+            // Opacity
+            isPinned && "opacity-95",
+            !isPinned && "opacity-100",
 
-								return (
-									<td
-										key={cell.id}
-										// style={{
-										// 	width: cell.column.getSize(),
-										// }}
-										style={{ ...getCommonPinningStyles(column) }}
-									>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
-								);
-							})}
-						</tr>
-					))}
-				</TableBody>
-				<TableFooter className="text-gray-500">
-					{footerGroup.map((footerGroup) => (
-						<TableRow key={footerGroup.id}>
-							{footerGroup.headers.map((header) => (
-								<TableHead
-									key={header.id}
-									colSpan={header.colSpan}
-									className="font-normal"
-								>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.footer,
-												header.getContext(),
-											)}
-								</TableHead>
-							))}
-						</TableRow>
-					))}
-				</TableFooter>
-			</Table>
-		</div>
-	);
+            // Position
+            isPinned ? "sticky" : "relative",
+
+            // Background color
+            isPinned && "bg-white",
+
+            // Width
+            `w-[${column.getSize()}px]`,
+
+            // Z-index
+            isPinned ? "z-[1]" : "z-0",
+            "border-b border-r border-lightgray px-1 py-0.5",
+        );
+    };
+
+    return (
+        <div className="border border-lightgray overflow-x-scroll w-full max-w-full relative">
+            <Table
+                style={{
+                    width: table.getTotalSize(),
+                }}
+                className="border border-lightgray border-separate"
+            >
+                <TableHeader>
+                    {headerGroups.map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                                const { column } = header;
+
+                                return (
+                                    <TableHead
+                                        className={getCommonPinningStylesTailwind(
+                                            column,
+                                        )}
+                                        key={header.id}
+                                        colSpan={header.colSpan}
+                                    >
+                                        {header.isPlaceholder ? null : (
+                                            <>
+                                                <div>
+                                                    {flexRender(
+                                                        header.column.columnDef
+                                                            .header,
+                                                        header.getContext(),
+                                                    )}{" "}
+                                                    <button
+                                                        onClick={header.column.getToggleSortingHandler()}
+                                                        className={
+                                                            header.column.getCanSort()
+                                                                ? "cursor-pointer select-none"
+                                                                : ""
+                                                        }
+                                                    >
+                                                        {{
+                                                            asc: "🔼",
+                                                            desc: "🔽",
+                                                        }[
+                                                            header.column.getIsSorted() as string
+                                                        ] ?? "📶"}
+                                                    </button>
+                                                </div>
+                                                {header.column.getCanFilter() ? (
+                                                    <div>
+                                                        <Filter
+                                                            column={
+                                                                header.column
+                                                            }
+                                                            table={table}
+                                                        />
+                                                    </div>
+                                                ) : null}
+                                            </>
+                                        )}
+                                        <div
+                                            className="absolute right-0 top-0 h-full w-1 bg-blue-300 select-none touch-none hover:bg-blue-500 cursor-col-resize"
+                                            onMouseDown={header.getResizeHandler()}
+                                            onTouchStart={header.getResizeHandler()}
+                                        />
+                                        {!header.isPlaceholder &&
+                                            header.column.getCanPin() && (
+                                                <TablePins
+                                                    isPinned={header.column.getIsPinned()}
+                                                    pin={header.column.pin}
+                                                />
+                                            )}
+                                        <Button
+                                            type="button"
+                                            onClick={() =>
+                                                table.setColumnOrder(
+                                                    reorder(
+                                                        table.getState(),
+                                                        header.column.id,
+                                                        "left",
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            {"<"}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            onClick={() =>
+                                                table.setColumnOrder(
+                                                    reorder(
+                                                        table.getState(),
+                                                        header.column.id,
+                                                        "right",
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            {">"}
+                                        </Button>
+                                        {header.column.getSize()}
+                                    </TableHead>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </TableHeader>
+                <TableBody className="border-b border-lightgray">
+                    {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => {
+                                const { column } = cell;
+
+                                return (
+                                    <td
+                                        key={cell.id}
+                                        className={getCommonPinningStylesTailwind(
+                                            column,
+                                        )}
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext(),
+                                        )}
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </TableBody>
+                <TableFooter className="text-gray-500">
+                    {footerGroup.map((footerGroup) => (
+                        <TableRow key={footerGroup.id}>
+                            {footerGroup.headers.map((header) => (
+                                <TableHead
+                                    key={header.id}
+                                    colSpan={header.colSpan}
+                                    className="font-normal"
+                                >
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                              header.column.columnDef.footer,
+                                              header.getContext(),
+                                          )}
+                                </TableHead>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableFooter>
+            </Table>
+        </div>
+    );
 }
 
 export default CustomTable;

@@ -1,222 +1,153 @@
 import {
-	ColumnDef,
-	type ColumnFiltersState,
-	getCoreRowModel,
-	getFacetedMinMaxValues,
-	getFacetedRowModel,
-	getFacetedUniqueValues,
-	getFilteredRowModel,
-	getGroupedRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type GroupingState,
-	useReactTable,
+    type ColumnDef,
+    type ColumnFiltersState,
+    type GroupingState,
+    getCoreRowModel,
+    getFacetedMinMaxValues,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
+    getFilteredRowModel,
+    getGroupedRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
 import { makeData } from "./makeData";
 
-import styled from "@emotion/styled";
+import { SearchableCheckboxDropdown } from "@/components/ui/checkboxList";
+import { faker } from "@faker-js/faker";
+import { loadData, saveData } from "../saveUtils";
+import ActionButtons from "./components/ActionButtons";
+import CustomTable from "./components/CustomTable";
+import DebouncedInput from "./components/DebouncedInput";
 import { useSkipper } from "./hooks";
 import {
-	columns,
-	defaultColumn,
-	fuzzyFilter,
-	getTableMeta,
+    columns,
+    defaultColumn,
+    fuzzyFilter,
+    getTableMeta,
 } from "./tableModels";
-import DebouncedInput from "./components/DebouncedInput";
-import ActionButtons from "./components/ActionButtons";
-import { faker } from "@faker-js/faker";
-import CustomTable from "./components/CustomTable";
-import { saveData, loadData } from "../saveUtils";
-
-const Styles = styled.div`
-  padding: 1rem;
-  border: 1px solid black;
-
-  table {
-    border-spacing: 0;
-    border: 1px solid black;
-
-    tr {
-      :last-child {
-        td {
-          border-bottom: 0;
-        }
-      }
-    }
-
-    th,
-    td {
-      margin: 0;
-      padding: 0.5rem;
-      border-bottom: 1px solid black;
-      border-right: 1px solid black;
-
-      :last-child {
-        border-right: 0;
-      }
-    }
-
-    td {
-      input {
-        font-size: 1rem;
-        padding: 0;
-        margin: 0;
-        border: 0;
-      }
-    }
-  }
-
-  .pagination {
-    padding: 0.5rem;
-  }
-`;
 
 export const Table = ({
-	data2: cols,
-	gridInfo,
-}: { data2: ColumnDef<any>[]; gridInfo: any[] }) => {
-	const rerender = React.useReducer(() => ({}), {})[1];
+    columnDefs: cols,
+    gridInfo: gridData,
+}: { columnDefs: ColumnDef<any>[]; gridInfo: Record<string, any>[] }) => {
+    const rerender = React.useReducer(() => ({}), {})[1];
 
-	const [data, setData] = React.useState(makeData(1000));
-	const refreshData = () => setData(makeData(1000));
+    const [data, setData] = React.useState(makeData(1000));
+    const refreshData = () => setData(makeData(1000));
 
-	const [globalFilter, setGlobalFilter] = React.useState("");
+    const [globalFilter, setGlobalFilter] = React.useState("");
 
-	const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
+    const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
 
-	// const generatedHeaders = makeHeaderData(10);
-	// const generatedolumns = makeColumnData(1000, generatedHeaders);
+    const table = useReactTable({
+        data: gridData,
+        columns: cols,
+        // defaultColumn,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getGroupedRowModel: getGroupedRowModel(),
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues(),
+        getFacetedMinMaxValues: getFacetedMinMaxValues(),
+        // onColumnFiltersChange: setColumnFilters,
+        onGlobalFilterChange: setGlobalFilter,
+        // globalFilterFn: fuzzyFilter,
+        autoResetPageIndex,
+        enableColumnResizing: true,
+        columnResizeMode: "onChange",
+        // onColumnVisibilityChange: setColumnVisibility,
+        // onColumnPinningChange: setColumnPinning,
+        // onRowSelectionChange: setRowSelection,
+        // Provide our updateData function to our table meta
+        // meta: getTableMeta(setData, skipAutoResetPageIndex),
+        state: {
+            globalFilter,
+        },
+        initialState: loadData(cols.map((d) => d.id)),
+        debugTable: true,
+        debugHeaders: true,
+        debugColumns: true,
+    });
 
-	const table = useReactTable({
-		data: gridInfo,
-		columns: cols,
-		// defaultColumn,
-		getCoreRowModel: getCoreRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getGroupedRowModel: getGroupedRowModel(),
-		getFacetedRowModel: getFacetedRowModel(),
-		getFacetedUniqueValues: getFacetedUniqueValues(),
-		getFacetedMinMaxValues: getFacetedMinMaxValues(),
-		// onColumnFiltersChange: setColumnFilters,
-		onGlobalFilterChange: setGlobalFilter,
-		// globalFilterFn: fuzzyFilter,
-		autoResetPageIndex,
-		enableColumnResizing: true,
-		columnResizeMode: "onChange",
-		// onColumnVisibilityChange: setColumnVisibility,
-		// onColumnPinningChange: setColumnPinning,
-		// onRowSelectionChange: setRowSelection,
-		// Provide our updateData function to our table meta
-		// meta: getTableMeta(setData, skipAutoResetPageIndex),
-		state: {
-			globalFilter,
-		},
-		initialState: loadData(),
-		debugTable: true,
-		debugHeaders: true,
-		debugColumns: true,
-	});
+    const randomizeColumns = () => {
+        table.setColumnOrder(
+            faker.helpers.shuffle(table.getAllLeafColumns().map((d) => d.id)),
+        );
+    };
 
-	const randomizeColumns = () => {
-		table.setColumnOrder(
-			faker.helpers.shuffle(table.getAllLeafColumns().map((d) => d.id)),
-		);
-	};
+    return (
+        <div>
+            <div className="p-2 grid grid-cols-4 gap-4">
+                <div className="p-2">
+                    Search:
+                    <DebouncedInput
+                        value={globalFilter ?? ""}
+                        onChange={(value) => setGlobalFilter(String(value))}
+                        className="mx-1 p-2 font-lg shadow border border-block"
+                        placeholder="Search all columns..."
+                    />
+                </div>
 
-	return (
-		<Styles>
-			<div className="p-2 grid grid-cols-4 gap-4">
-				<div className="p-2">
-					Search:
-					<DebouncedInput
-						value={globalFilter ?? ""}
-						onChange={(value) => setGlobalFilter(String(value))}
-						className="mx-1 p-2 font-lg shadow border border-block"
-						placeholder="Search all columns..."
-					/>
-				</div>
-				<div className="p-2 inline-block border border-black shadow rounded">
-					<div className="px-1 border-b border-black">
-						<label>
-							<input
-								type="checkbox"
-								checked={table.getIsAllColumnsVisible()}
-								onChange={table.getToggleAllColumnsVisibilityHandler()}
-								className="mr-1"
-							/>
-							Toggle All
-						</label>
-					</div>
-					{table.getAllLeafColumns().map((column) => {
-						return (
-							<div key={column.id} className="px-1">
-								<label>
-									<input
-										type="checkbox"
-										checked={column.getIsVisible()}
-										onChange={column.getToggleVisibilityHandler()}
-										className="mr-1"
-									/>
-									{column.id}
-								</label>
-							</div>
-						);
-					})}
-				</div>
-				<div className="p-2">
-					<button
-						onClick={randomizeColumns}
-						className="border rounded p-1"
-						type="button"
-					>
-						Shuffle Columns
-					</button>
-				</div>
-				<div className="p-2">
-					<button
-						onClick={() => saveData(table.getState())}
-						className="border rounded p-1"
-						type="button"
-					>
-						Save state
-					</button>
-				</div>
-			</div>
-			<div
-			//! This fucks up the resizing
-			// style={{
-			// 	overflowX: "scroll",
-			// 	// width: "1000px",
-			// }}
-			>
-				<CustomTable table={table} tableGroup={undefined} />
-			</div>
-			<div className="p-2" />
+                <SearchableCheckboxDropdown
+                    columns={table.getAllLeafColumns()}
+                />
 
-			<ActionButtons
-				getSelectedRowModel={table.getSelectedRowModel}
-				hasNextPage={table.getCanNextPage()}
-				hasPreviousPage={table.getCanPreviousPage()}
-				nextPage={table.nextPage}
-				pageCount={table.getPageCount()}
-				pageIndex={table.getState().pagination.pageIndex}
-				pageSize={table.getState().pagination.pageSize}
-				previousPage={table.previousPage}
-				refreshData={refreshData}
-				rerender={rerender}
-				rowSelection={table.getSelectedRowModel()}
-				setPageIndex={table.setPageIndex}
-				setPageSize={table.setPageSize}
-				totalRows={table.getPrePaginationRowModel().rows.length}
-			/>
+                <div className="p-2">
+                    <button
+                        onClick={randomizeColumns}
+                        className="border rounded p-1"
+                        type="button"
+                    >
+                        Shuffle Columns
+                    </button>
+                </div>
+                <div className="p-2">
+                    <button
+                        onClick={() => saveData(table.getState())}
+                        className="border rounded p-1"
+                        type="button"
+                    >
+                        Save state
+                    </button>
+                </div>
+            </div>
+            <div
+            //! This fucks up the resizing
+            // style={{
+            // 	overflowX: "scroll",
+            // 	// width: "1000px",
+            // }}
+            >
+                <CustomTable table={table} />
+            </div>
+            <div className="p-2" />
 
-			<div className="p-2" />
-			<pre>{JSON.stringify(table.getState(), null, 2)}</pre>
-		</Styles>
-	);
+            <ActionButtons
+                getSelectedRowModel={table.getSelectedRowModel}
+                hasNextPage={table.getCanNextPage()}
+                hasPreviousPage={table.getCanPreviousPage()}
+                nextPage={table.nextPage}
+                pageCount={table.getPageCount()}
+                pageIndex={table.getState().pagination.pageIndex}
+                pageSize={table.getState().pagination.pageSize}
+                previousPage={table.previousPage}
+                refreshData={refreshData}
+                rerender={rerender}
+                rowSelection={table.getSelectedRowModel()}
+                setPageIndex={table.setPageIndex}
+                setPageSize={table.setPageSize}
+                totalRows={table.getPrePaginationRowModel().rows.length}
+            />
+
+            <div className="p-2" />
+            <pre>{JSON.stringify(table.getState(), null, 2)}</pre>
+        </div>
+    );
 };
 
 export default Table;

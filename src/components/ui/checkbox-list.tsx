@@ -14,9 +14,7 @@ type SearchableCheckboxDropdownProps = {
     columns: Column<any, any>[];
 };
 
-export function SearchableCheckboxDropdown({
-    columns,
-}: SearchableCheckboxDropdownProps) {
+export function CheckboxList({ columns }: SearchableCheckboxDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [checkedItems, setCheckedItems] = useState({});

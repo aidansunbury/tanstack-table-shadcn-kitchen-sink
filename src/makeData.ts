@@ -1,26 +1,28 @@
 import { faker } from "@faker-js/faker";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { AccessorColumnDef } from "@tanstack/react-table";
+
+// Represents the data type of entries in the table
+type TDataType = string;
+
+// Represents an individual column in the table
 type Header = {
-    id: string;
-    accessorKey: string;
+    id: string; // The column header
+    accessorKey: string; // The key to access the data
 };
 
-export type Person = {
-    firstName: string;
-    lastName: string;
-    age: number;
-    prop1: number;
-    prop2: number;
-    prop3: number;
-    prop4: number;
-    prop5: number;
-    prop6: number;
-    prop7: number;
-    visits: number;
-    progress: number;
-    status: "relationship" | "complicated" | "single";
-    subRows?: Person[];
-};
+// A record that contains all the accessor keys and their corresponding data
+
+//* Could look like this:
+// type Person = {
+//     firstName: string;
+//     lastName: string;
+//     age: number;
+//     visits: number;
+//     status: string;
+//     progress: number;
+// };
+
+type Row = Record<string, TDataType>;
 
 const range = (len: number) => {
     const arr: number[] = [];
@@ -30,44 +32,8 @@ const range = (len: number) => {
     return arr;
 };
 
-const newPerson = (): Person => {
-    return {
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        age: faker.number.int(40),
-        prop1: faker.number.int(100),
-        prop2: faker.number.int(100),
-        prop3: faker.number.int(100),
-        prop4: faker.number.int(100),
-        prop5: faker.number.int(100),
-        prop6: faker.number.int(100),
-        prop7: faker.number.int(100),
-        visits: faker.number.int(1000),
-        progress: faker.number.int(100),
-        status: faker.helpers.shuffle<Person["status"]>([
-            "relationship",
-            "complicated",
-            "single",
-        ])[0]!,
-    };
-};
-
-export function makeData(...lens: number[]) {
-    const makeDataLevel = (depth = 0): Person[] => {
-        const len = lens[depth]!;
-        return range(len).map((d): Person => {
-            return {
-                ...newPerson(),
-                subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
-            };
-        });
-    };
-
-    return makeDataLevel();
-}
-
 // Make items number of columns
-export function makeHeaderData(items: number): ColumnDef<any>[] {
+export function makeHeaderData(items: number): AccessorColumnDef<Header>[] {
     return range(items).map((i) => ({
         id: `header-${i}`,
         accessorKey: `col-${i}`,
@@ -75,7 +41,7 @@ export function makeHeaderData(items: number): ColumnDef<any>[] {
     }));
 }
 
-export function makeColumnData(rows: number, headers: Header[]) {
+export function makeColumnData(rows: number, headers: Header[]): Row[] {
     const columns: Record<string, string>[] = [];
 
     for (let i = 0; i < rows; i++) {

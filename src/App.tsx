@@ -23,11 +23,6 @@ export const App = () => {
                         ),
                         cell: ({ row }) => (
                             <div className="px-1">
-                                {/* <IndeterminateCheckbox
-                                    checked={row.getIsSelected()}
-                                    indeterminate={row.getIsSomeSelected()}
-                                    onChange={row.getToggleSelectedHandler()}
-                                /> */}
                                 <Checkbox
                                     checked={row.getIsSelected()}
                                     // onChange={table.getToggleAllRowsSelectedHandler()}
@@ -40,6 +35,12 @@ export const App = () => {
                 ]}
                 gridInfo={columns}
             />
+            <pre>
+                <code>{JSON.stringify(headers, null, 2)}</code>
+            </pre>{" "}
+            <pre>
+                <code>{JSON.stringify(columns, null, 2)}</code>
+            </pre>
         </TooltipProvider>
     );
 };

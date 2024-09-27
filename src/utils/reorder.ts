@@ -3,25 +3,28 @@
 type Direction = "left" | "right";
 import type { TableState } from "@tanstack/react-table";
 
-// todo Also should move it past all invisible columns / pinned columns
-
+// Todo account for pinned columns as well
 export function reorder(
     tableState: TableState,
     source: string,
     direction: Direction,
 ): string[] {
-    const { columnOrder: columnIds, columnPinning } = tableState;
+    const {
+        columnOrder: columnIds,
+        columnPinning, // Todo
+        columnVisibility,
+    } = tableState;
     let destinationIndex = 0;
     const sourceIndex = columnIds.indexOf(source);
     if (sourceIndex === -1) {
         return columnIds;
     }
-    if (direction === "left") {
-        destinationIndex = sourceIndex - 1;
+    const increment = direction === "left" ? -1 : 1;
+    destinationIndex = sourceIndex + increment;
+    while (columnVisibility[columnIds[destinationIndex]] === false) {
+        destinationIndex += increment;
     }
-    if (direction === "right") {
-        destinationIndex = sourceIndex + 1;
-    }
+
     if (destinationIndex < 0 || destinationIndex >= columnIds.length) {
         return columnIds;
     }

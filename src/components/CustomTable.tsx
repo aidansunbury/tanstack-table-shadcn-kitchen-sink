@@ -65,7 +65,7 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
     };
 
     return (
-        <div className="border border-lightgray overflow-x-scroll w-full max-w-full relative">
+        <div className="border border-lightgray overflow-x-scroll w-full max-w-full relative shadow-lg m-2">
             <Table
                 style={{
                     width: table.getTotalSize(),
@@ -86,8 +86,15 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                                         key={header.id}
                                         colSpan={header.colSpan}
                                     >
-                                        {header.isPlaceholder ? null : (
-                                            <>
+                                        <div
+                                            className={clsx("flex", {
+                                                "flex-col":
+                                                    column.getSize() > 200,
+                                                "flex-row justify-between":
+                                                    column.getSize() <= 200,
+                                            })}
+                                        >
+                                            {header.isPlaceholder ? null : (
                                                 <div>
                                                     {flexRender(
                                                         header.column.columnDef
@@ -95,33 +102,20 @@ export function CustomTable<T extends RowData>({ table }: TableProps<T>) {
                                                         header.getContext(),
                                                     )}{" "}
                                                 </div>
+                                            )}
+                                            {/* Get column width */}
+                                            {/* {column.getSize()} */}
 
-                                                {/* Search Filter */}
-                                                {/* {header.column.getCanFilter() ? (
-                                                    <div>
-                                                        <Filter
-                                                            column={
-                                                                header.column
-                                                            }
-                                                            table={table}
-                                                        />
-                                                    </div>
-                                                ) : null} */}
-                                            </>
-                                        )}
-                                        {/* Get column width */}
-                                        {column.getSize()}
-
-                                        {/* //!Fix resize Todo */}
+                                            <HeaderActions
+                                                column={header.column}
+                                                table={table}
+                                            />
+                                        </div>
+                                        {/* Column Resizer */}
                                         <div
-                                            className="absolute right-0 top-0 h-full w-1 bg-blue-300 select-none touch-none hover:bg-blue-500 cursor-col-resize"
+                                            className="absolute right-0 top-0 h-full w-1 select-none touch-none hover:bg-blue-500 cursor-col-resize"
                                             onMouseDown={header.getResizeHandler()}
                                             onTouchStart={header.getResizeHandler()}
-                                        />
-
-                                        <HeaderActions
-                                            column={header.column}
-                                            table={table}
                                         />
                                     </TableHead>
                                 );

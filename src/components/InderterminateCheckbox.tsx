@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Checkbox } from "@/components/ui/checkbox";
 type Props = {
     indeterminate?: boolean;
 } & React.HTMLProps<HTMLInputElement>;
